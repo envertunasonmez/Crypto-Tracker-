@@ -3,10 +3,10 @@ import 'package:provider/provider.dart';
 
 import 'package:trade_app/core/widgets/empty_view.dart';
 import 'package:trade_app/core/widgets/error_view.dart';
-import 'package:trade_app/core/widgets/loading_view.dart';
 import 'package:trade_app/features/market/presentation/providers/market_provider.dart';
-import 'package:trade_app/features/market/presentation/widgets/market_list_item.dart';
-import 'package:trade_app/features/market/presentation/screens/market_detail_screen.dart' as detail;
+import 'package:trade_app/features/market/presentation/screens/market_list/widgets/market_list_item.dart';
+import 'package:trade_app/features/market/presentation/screens/market_list/widgets/shimmer_loading.dart';
+import 'package:trade_app/features/market/presentation/screens/market_detail/market_detail_screen.dart' as detail;
 
 class MarketListContent extends StatelessWidget {
   final int displayedCount;
@@ -25,7 +25,7 @@ class MarketListContent extends StatelessWidget {
         switch (provider.state) {
           case MarketState.loading:
             return const SliverFillRemaining(
-              child: LoadingView(message: 'Markets are loading...'),
+              child: ShimmerLoading(),
             );
           case MarketState.error:
             return SliverFillRemaining(
@@ -59,10 +59,38 @@ class MarketListContent extends StatelessWidget {
                     return MarketListItem(
                       key: ValueKey(ticker.symbol),
                       ticker: ticker,
+                      index: index,
                       onTap: () => Navigator.push(
                         context,
-                        MaterialPageRoute<void>(
-                          builder: (context) => detail.MarketDetailScreen(symbol: ticker.symbol),
+                        PageRouteBuilder(
+                          pageBuilder: (context, animation, secondaryAnimation) =>
+                              detail.MarketDetailScreen(symbol: ticker.symbol),
+                          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                            const begin = Offset(1.0, 0.0);
+                            const end = Offset.zero;
+                            const curve = Curves.easeInOutCubic;
+
+                            var tween = Tween(begin: begin, end: end).chain(
+                              CurveTween(curve: curve),
+                            );
+
+                            var offsetAnimation = animation.drive(tween);
+                            var fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+                              CurvedAnimation(
+                                parent: animation,
+                                curve: const Interval(0.0, 0.5),
+                              ),
+                            );
+
+                            return SlideTransition(
+                              position: offsetAnimation,
+                              child: FadeTransition(
+                                opacity: fadeAnimation,
+                                child: child,
+                              ),
+                            );
+                          },
+                          transitionDuration: const Duration(milliseconds: 400),
                         ),
                       ),
                     );
@@ -76,5 +104,4 @@ class MarketListContent extends StatelessWidget {
       },
     );
   }
-
 }

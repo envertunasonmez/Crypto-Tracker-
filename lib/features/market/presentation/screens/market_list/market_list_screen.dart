@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:trade_app/features/market/presentation/providers/market_provider.dart';
-import 'package:trade_app/features/market/presentation/widgets/market_list_content.dart';
-import 'package:trade_app/features/market/presentation/widgets/market_search_header.dart';
+import 'package:trade_app/features/market/presentation/screens/market_list/widgets/market_list_content.dart';
+import 'package:trade_app/features/market/presentation/screens/market_list/widgets/market_search_header.dart';
 
 class MarketListScreen extends StatefulWidget {
   const MarketListScreen({super.key});

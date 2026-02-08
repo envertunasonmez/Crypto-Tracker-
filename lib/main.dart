@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'features/market/presentation/providers/market_provider.dart';
-import 'features/market/presentation/screens/market_list_screen.dart';
+import 'features/market/presentation/screens/market_list/market_list_screen.dart';
 
 void main() {
   runApp(const CryptoTrackerApp());

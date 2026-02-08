@@ -7,7 +7,7 @@ import 'package:trade_app/features/market/data/datasources/market_websocket_data
 import 'package:trade_app/features/market/data/models/ticker.dart';
 import 'package:trade_app/features/market/data/repositories/market_repository.dart';
 
-enum MarketState { initial, loading, success, error }
+enum MarketState { initial, loading, success, error, loadingFromCache }
 
 class MarketProvider with ChangeNotifier {
   MarketProvider({MarketRepository? repository})
@@ -20,6 +20,7 @@ class MarketProvider with ChangeNotifier {
   List<Ticker> _tickers = [];
   String _searchQuery = '';
   String? _errorMessage;
+  bool _isLoadedFromCache = false;
 
   // WebSocket throttle - Up to 1 notify every 100ms
   static const _throttleDuration = Duration(milliseconds: 100);
@@ -30,6 +31,7 @@ class MarketProvider with ChangeNotifier {
   List<Ticker> get tickers => List.unmodifiable(_tickers);
   String get searchQuery => _searchQuery;
   String? get errorMessage => _errorMessage;
+  bool get isLoadedFromCache => _isLoadedFromCache;
 
   List<Ticker> get filteredTickers {
     if (_searchQuery.isEmpty) return _tickers;
@@ -50,14 +52,53 @@ class MarketProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> loadMarkets() async {
-    _state = MarketState.loading;
+  /// Load markets with cache-first strategy
+  /// 1. Try to load from cache (instant)
+  /// 2. Then fetch fresh data from API in background
+  Future<void> loadMarkets({bool forceRefresh = false}) async {
     _errorMessage = null;
-    notifyListeners();
 
+    if (forceRefresh) {
+      // Force refresh: show loading state
+      _state = MarketState.loading;
+      _isLoadedFromCache = false;
+      notifyListeners();
+    } else {
+      // Try cache first
+      try {
+        _state = MarketState.loadingFromCache;
+        notifyListeners();
+
+        final cachedData = await _repository.fetchTickers(forceRefresh: false);
+
+        if (cachedData.isNotEmpty) {
+          _tickers = cachedData;
+          _isLoadedFromCache = true;
+          _state = MarketState.success;
+          notifyListeners();
+
+          // Connect WebSocket for real-time updates
+          _connectWebSocket();
+
+          // Then fetch fresh data in background
+          _fetchFreshDataInBackground();
+          return;
+        }
+      } catch (e) {
+        // Cache failed, continue to API fetch
+      }
+
+      // No cache available, show loading
+      _state = MarketState.loading;
+      _isLoadedFromCache = false;
+      notifyListeners();
+    }
+
+    // Fetch from API
     try {
-      _tickers = await _repository.fetchTickers();
+      _tickers = await _repository.fetchTickers(forceRefresh: true);
       _state = MarketState.success;
+      _isLoadedFromCache = false;
       _connectWebSocket();
     } on MarketApiException catch (e) {
       _state = MarketState.error;
@@ -67,6 +108,18 @@ class MarketProvider with ChangeNotifier {
       _errorMessage = 'Unexpected error: $e';
     }
     notifyListeners();
+  }
+
+  /// Fetch fresh data in background (silently update)
+  Future<void> _fetchFreshDataInBackground() async {
+    try {
+      final freshData = await _repository.fetchTickers(forceRefresh: true);
+      _tickers = freshData;
+      _isLoadedFromCache = false;
+      notifyListeners();
+    } catch (e) {
+      // Silent fail - user already has cached data
+    }
   }
 
   void _connectWebSocket() {
@@ -107,7 +160,13 @@ class MarketProvider with ChangeNotifier {
     }
   }
 
-  void retry() => loadMarkets();
+  /// Clear cache and reload
+  Future<void> clearCacheAndReload() async {
+    await _repository.clearCache();
+    await loadMarkets(forceRefresh: true);
+  }
+
+  void retry() => loadMarkets(forceRefresh: true);
 
   @override
   void dispose() {

@@ -1,0 +1,63 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import 'package:trade_app/features/market/presentation/providers/market_provider.dart';
+
+/// Cache status indicator banner shown when data is loaded from cache
+class CacheStatusBanner extends StatelessWidget {
+  const CacheStatusBanner({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<MarketProvider>(
+      builder: (context, provider, _) {
+        if (!provider.isLoadedFromCache) return const SizedBox.shrink();
+
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          color: Colors.amber.shade100,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.offline_bolt_rounded,
+                size: 16,
+                color: Colors.amber.shade900,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Showing cached data • Updating in background...',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.amber.shade900,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  provider.loadMarkets(forceRefresh: true);
+                },
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  minimumSize: const Size(0, 0),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(
+                  'Refresh',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.amber.shade900,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}

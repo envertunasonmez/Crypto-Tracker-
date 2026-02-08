@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'package:trade_app/core/widgets/empty_view.dart';
 import 'package:trade_app/core/widgets/error_view.dart';
+import 'package:trade_app/core/widgets/loading_view.dart';
 import 'package:trade_app/features/market/presentation/providers/market_provider.dart';
 import 'package:trade_app/features/market/presentation/screens/market_list/widgets/market_list_item.dart';
 import 'package:trade_app/features/market/presentation/screens/market_list/widgets/shimmer_loading.dart';
@@ -23,10 +24,16 @@ class MarketListContent extends StatelessWidget {
     return Consumer<MarketProvider>(
       builder: (context, provider, _) {
         switch (provider.state) {
+          case MarketState.loadingFromCache:
+            return const SliverFillRemaining(
+              child: LoadingView(message: 'Loading markets...'),
+            );
+
           case MarketState.loading:
             return const SliverFillRemaining(
               child: ShimmerLoading(),
             );
+
           case MarketState.error:
             return SliverFillRemaining(
               child: ErrorView(
@@ -34,6 +41,7 @@ class MarketListContent extends StatelessWidget {
                 onRetry: provider.retry,
               ),
             );
+
           case MarketState.success:
           case MarketState.initial:
             final tickers = provider.filteredTickers;

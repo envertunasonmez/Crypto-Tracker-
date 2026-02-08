@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:trade_app/features/market/presentation/providers/market_provider.dart';
+import 'package:trade_app/features/market/presentation/screens/market_list/widgets/cache_status_banner';
 import 'package:trade_app/features/market/presentation/screens/market_list/widgets/market_list_content.dart';
 import 'package:trade_app/features/market/presentation/screens/market_list/widgets/market_search_header.dart';
 
@@ -50,28 +51,38 @@ class _MarketListScreenState extends State<MarketListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: () => context.read<MarketProvider>().loadMarkets(),
-          child: CustomScrollView(
-            controller: _scrollController,
-            physics: const AlwaysScrollableScrollPhysics(),
-            slivers: [
-              SliverToBoxAdapter(
-                child: MarketSearchHeader(
-                  searchController: _searchController,
-                  onSearchChanged: (v) => context.read<MarketProvider>().setSearchQuery(v),
-                  onClear: () {
-                    _searchController.clear();
-                    context.read<MarketProvider>().setSearchQuery('');
-                  },
+        child: Column(
+          children: [
+            const CacheStatusBanner(),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: () => context.read<MarketProvider>().loadMarkets(
+                  forceRefresh: true,
+                ),
+                child: CustomScrollView(
+                  controller: _scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: MarketSearchHeader(
+                        searchController: _searchController,
+                        onSearchChanged: (v) =>
+                            context.read<MarketProvider>().setSearchQuery(v),
+                        onClear: () {
+                          _searchController.clear();
+                          context.read<MarketProvider>().setSearchQuery('');
+                        },
+                      ),
+                    ),
+                    MarketListContent(
+                      displayedCount: _displayedCount,
+                      initialLoadCount: _initialLoadCount,
+                    ),
+                  ],
                 ),
               ),
-              MarketListContent(
-                displayedCount: _displayedCount,
-                initialLoadCount: _initialLoadCount,
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

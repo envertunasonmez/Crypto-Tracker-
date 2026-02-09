@@ -101,7 +101,6 @@ class _DetailRowState extends State<DetailRow> with SingleTickerProviderStateMix
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
                                 color: valueColor?.withOpacity(0.3) ?? Colors.transparent,
-                                width: 1,
                               ),
                             )
                           : null,

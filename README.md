@@ -257,7 +257,12 @@ flutter pub get
 
 ## 🖼️ Ekran Tanıtımları
 
+| Market Liste | Arama | Detay Ekranı |
+|---|---|---|
+| ![Market List](screenshots/market_list.png) | ![Search](screenshots/search.png) | ![Detail Screen](screenshots/detail.png) |
+
 ### 1. Market Liste Ekranı (MarketListScreen)
+
 **Dosya**: lib/features/market/presentation/screens/market_list/market_list_screen.dart
 
 **Bileşenler:**
@@ -274,7 +279,16 @@ flutter pub get
 - Success: Tickers listesi
 - Empty: "Veri bulunamadı" mesajı
 
-### 2. Market Detay Ekranı (MarketDetailScreen)
+### 2. Arama Ekranı (Search)
+
+**Özellikler:**
+- Gerçek zamanlı sembol arama
+- Bağlamsal filtreleme (örn: "btc" yazılınca BTCUSDT, BTCBUSD vb. göster)
+- Arama geçmişi yönetimi
+- Hızlı sonuç listesi
+
+### 3. Market Detay Ekranı (MarketDetailScreen)
+
 **Dosya**: lib/features/market/presentation/screens/market_detail/market_detail_screen.dart
 
 **Bileşenler:**
@@ -293,7 +307,7 @@ flutter pub get
   - Bid-Ask Aralığı
   - Sembol
 
-### 3. Loading Durumu (Shimmer)
+### 4. Loading Durumu (Shimmer)
 **Dosya**: lib/core/widgets/shimmer_loading.dart
 - Gri placeholder kartlar
 - 1.5 saniye shimmer animasyonu

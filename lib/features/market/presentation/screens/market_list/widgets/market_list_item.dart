@@ -323,7 +323,6 @@ class _ChangePercentChip extends StatelessWidget {
                   color: isPositive
                       ? const Color(0xFF22C55E).withOpacity(0.3)
                       : const Color(0xFFEF4444).withOpacity(0.3),
-                  width: 1,
                 ),
               ),
               child: Row(

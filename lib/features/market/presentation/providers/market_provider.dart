@@ -69,7 +69,7 @@ class MarketProvider with ChangeNotifier {
         _state = MarketState.loadingFromCache;
         notifyListeners();
 
-        final cachedData = await _repository.fetchTickers(forceRefresh: false);
+        final cachedData = await _repository.fetchTickers();
 
         if (cachedData.isNotEmpty) {
           _tickers = cachedData;

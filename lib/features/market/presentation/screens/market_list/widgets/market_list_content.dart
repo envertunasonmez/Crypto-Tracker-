@@ -78,12 +78,12 @@ class MarketListContent extends StatelessWidget {
                             const end = Offset.zero;
                             const curve = Curves.easeInOutCubic;
 
-                            var tween = Tween(begin: begin, end: end).chain(
+                            final tween = Tween(begin: begin, end: end).chain(
                               CurveTween(curve: curve),
                             );
 
-                            var offsetAnimation = animation.drive(tween);
-                            var fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+                            final offsetAnimation = animation.drive(tween);
+                            final fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
                               CurvedAnimation(
                                 parent: animation,
                                 curve: const Interval(0.0, 0.5),
